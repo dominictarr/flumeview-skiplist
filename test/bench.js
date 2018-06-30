@@ -22,7 +22,7 @@ var codec = {
 }
 
 require('test-flumeview-index/bench')(function (file, seed) {
-  return Flume(Log(file+'/log.offset', 1024, codec))
+  return Flume(Log(file+'/log.offset', 64*1024, codec))
     .use('index', Index(1, function (a, b) {
       return a.key < b.key ? -1 : a.key > b.key ? 1 : 0
     }))
@@ -30,8 +30,8 @@ require('test-flumeview-index/bench')(function (file, seed) {
 
 
 process.on('exit', function () {
-  console.log('decodes', decodes, time/1000000000)
-  console.log('memory', process.memoryUsage())
+  console.error('decodes', decodes, time/1000000000)
+  console.error('memory', process.memoryUsage())
 })
 
 
