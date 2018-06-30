@@ -31,4 +31,7 @@ require('test-flumeview-index/bench')(function (file, seed) {
 
 process.on('exit', function () {
   console.log('decodes', decodes, time/1000000000)
+  console.log('memory', process.memoryUsage())
 })
+
+
