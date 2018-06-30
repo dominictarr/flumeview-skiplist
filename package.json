@@ -1,0 +1,25 @@
+{
+  "name": "flumeview-skiplist",
+  "description": "",
+  "version": "1.0.0",
+  "homepage": "https://github.com/dominictarr/flumeview-skiplist",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dominictarr/flumeview-skiplist.git"
+  },
+  "dependencies": {
+    "lru_cache": "^1.0.2",
+    "tiny-lru": "^1.6.1"
+  },
+  "devDependencies": {
+    "flumecodec": "0.0.1",
+    "flumedb": "^0.4.9",
+    "flumelog-offset": "^3.3.1",
+    "test-flumeview-index": "^2.2.0"
+  },
+  "scripts": {
+    "test": "set -e; for t in test/*.js; do node $t; done"
+  },
+  "author": "Dominic Tarr <dominic.tarr@gmail.com> (http://dominictarr.com)",
+  "license": "MIT"
+}
