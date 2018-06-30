@@ -14,6 +14,10 @@ module.exports = function (version, compare) {
     var cache = new Cache(5000)
     var hits = {}
 
+    process.on('exit', function () {
+      console.log('skiplist_mem:', buffer.readUInt32LE(0))
+    })
+
     function get (offset, cb) {
       var value = cache.get(offset.toString())
 
@@ -35,35 +39,26 @@ module.exports = function (version, compare) {
           read(null, function next (err, data) {
             var seq = data.seq
             var value = data.value
-            ll.insertAsync(
-              buffer, get, start,
-              value, seq+1, null,
-              compare,
-              function (err, ptr) {
-                since.set(seq)
-                read(null, next)
-              }
-            )
+            var key = value.key + '!'+seq
+            var c = ll.insertString(buffer, start, key)
+            since.set(seq)
+            read(null, next)
           })
         }
       },
       get: function (key, cb) {
-        ll.findAsync(
-          buffer, get, start,
-          {key: key}, null, compare, cb
+        var ptr = ll.findString(
+          buffer, start,
+          key, null, compare
         )
+        if(ptr) {
+          var sptr = buffer.readUInt32LE(ptr)
+          var str = buffer.toString('utf8', sptr+4, sptr+4+buffer.readUInt32LE(sptr))
+          log.get(+str.split('!')[1], cb)
+        }
       },
       methods: { get: 'async'}
     }
   }
 }
-
-
-
-
-
-
-
-
-
 
