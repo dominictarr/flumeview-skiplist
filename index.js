@@ -1,4 +1,6 @@
 var ll = require('skiplist')
+var ll_wasm = require('skiplist/wasm')
+
 var d = require('skiplist/debug')
 var Cache = require('lru_cache').LRUCache
 var Obv = require('obv')
@@ -7,29 +9,15 @@ module.exports = function (version, compare) {
   return function (log, name) {
     var since = Obv()
     since.set(-1)
-    var buffer = Buffer.alloc(1024*1024*2)
+    //var buffer = Buffer.alloc(1024*1024*2)
+    var buffer = ll_wasm.grow(32) //Buffer.alloc(1024*1024*2)
     var l = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     var start = d.item(buffer, 0, l)
 
-    var cache = new Cache(5000)
-    var hits = {}
-
-    process.on('exit', function () {
-      console.log('skiplist_mem:', buffer.readUInt32LE(0))
-    })
-
     function get (offset, cb) {
-      var value = cache.get(offset.toString())
-
-      if(value)
-        cb(null, value)
-      else {
-        log.get(offset-1, function (err, value) {
-          cache.set(offset.toString(), value)
-          hits[offset] = true
-          cb(err, value)
-        })
-      }
+      log.get(offset-1, function (err, value) {
+        cb(err, value)
+      })
     }
 
     return {
@@ -47,12 +35,10 @@ module.exports = function (version, compare) {
         }
       },
       get: function (key, cb) {
-        var ptr = ll.findString(
-          buffer, start,
-          key, null, compare
-        )
+        var ptr = ll_wasm.findString(start, key, l.length - 1)
         if(ptr) {
           var sptr = buffer.readUInt32LE(ptr)
+          if(sptr === 0) return cb(new Error('not found:'+key))
           var str = buffer.toString('utf8', sptr+4, sptr+4+buffer.readUInt32LE(sptr))
           log.get(+str.split('!')[1], cb)
         }
