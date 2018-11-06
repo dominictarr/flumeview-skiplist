@@ -1,7 +1,7 @@
-var ll = require('skiplist')
-var ll_wasm = require('skiplist/wasm')
+var ll = require('skiplist-buffer')
+var ll_wasm = require('skiplist-buffer/wasm')
 
-var d = require('skiplist/debug')
+var d = require('skiplist-buffer/debug')
 var Cache = require('lru_cache').LRUCache
 var Obv = require('obv')
 module.exports = function (version, compare) {
