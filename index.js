@@ -28,7 +28,10 @@ module.exports = function (version, compare) {
             var seq = data.seq
             var value = data.value
             var key = value.key + '!'+seq
-            var c = ll.insertString(buffer, start, key)
+            var key_buffer = Buffer.alloc(Buffer.byteLength(value.key)+4)
+            key_buffer.write(key)
+            key_buffer.writeUInt32LE(seq, key_buffer.length-4)
+            var c = ll.insertBuffer(buffer, start, key_buffer) //Buffer.from(key))
             since.set(seq)
             read(null, next)
           })
@@ -39,12 +42,19 @@ module.exports = function (version, compare) {
         if(ptr) {
           var sptr = buffer.readUInt32LE(ptr)
           if(sptr === 0) return cb(new Error('not found:'+key))
-          var str = buffer.toString('utf8', sptr+4, sptr+4+buffer.readUInt32LE(sptr))
-          log.get(+str.split('!')[1], cb)
+          var seq = buffer.readUInt32LE(sptr+buffer.readUInt32LE(sptr))
+          log.get(seq, cb)
         }
       },
       methods: { get: 'async'}
     }
   }
 }
+
+
+
+
+
+
+
 
